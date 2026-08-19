@@ -17,3 +17,22 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+* { box-sizing: border-box; }
+button, a, input, select { -webkit-tap-highlight-color: transparent; }
+
+@media (max-width: 1023px) {
+  aside { width: 4.5rem !important; }
+  aside > div:first-child { justify-content: center; padding-inline: .75rem; }
+  aside > div:first-child > div:last-child, aside nav .mb-1\.5, aside nav span:not(.h-2), aside nav + div { display: none; }
+  aside nav { padding-inline: .5rem; }
+  aside nav a { justify-content: center; padding-inline: .75rem; }
+  aside nav a span { display: none; }
+  main { padding: 1rem !important; }
+}
+
+@media (max-width: 640px) {
+  header { position: relative !important; }
+  header h1 { font-size: 1rem; }
+  main { padding: .75rem !important; }
+}

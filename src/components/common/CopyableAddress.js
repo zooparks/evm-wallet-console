@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useI18n } from "@/i18n/I18nProvider";
 
 export default function CopyableAddress({ address, className }) {
+  const { t } = useI18n();
   const [copied, setCopied] = useState(false);
 
   async function copy(e) {
@@ -28,8 +30,10 @@ export default function CopyableAddress({ address, className }) {
         {address}
       </span>
       <button
+        type="button"
         onClick={copy}
-        title={copied ? "已复制" : "复制地址"}
+        aria-label={copied ? t("Copied") : t("Copy address")}
+        title={copied ? t("Copied") : t("Copy address")}
         className={`shrink-0 rounded p-1 transition-colors ${
           copied ? "text-teal-600" : "text-gray-400 hover:bg-gray-100 hover:text-gray-600"
         }`}

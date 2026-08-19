@@ -37,6 +37,10 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# Wallet imports can contain private keys or seed phrases. Keep them outside
+# version control; use an encrypted signer record for runtime execution.
+/wallets/*.csv
+
 # vercel
 .vercel
 

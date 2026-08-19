@@ -2,21 +2,34 @@
   "name": "evm-wallet-console",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "next dev",
+    "dev": "concurrently -k -n web,worker \"npm:dev:web\" \"npm:worker\"",
+    "dev:web": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "worker": "tsx scripts/task-worker.js",
+    "worker:legacy": "node scripts/worker.mjs",
+    "test": "node --test src/lib/execution/*.test.js",
+    "lint": "eslint",
+    "db:migrate": "node scripts/migrate.mjs"
   },
   "dependencies": {
+    "ethers": "^6.17.0",
+    "mysql2": "^3.23.3",
     "next": "16.3.1",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "redis": "^4.7.1",
+    "viem": "^2.55.18"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/react": "19.2.18",
+    "concurrently": "^10.0.5",
     "eslint": "^9",
     "eslint-config-next": "16.3.1",
-    "tailwindcss": "^4"
+    "tailwindcss": "^4",
+    "tsx": "^4.23.12"
   }
 }

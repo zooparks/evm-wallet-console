@@ -2,31 +2,32 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { tasks } from "@/data/mock";
+import { useEffect, useState } from "react";
+import { useI18n } from "@/i18n/I18nProvider";
 
 const NAV_GROUPS = [
   {
-    title: "总览",
+    title: "Overview",
     items: [
       { label: "Dashboard", href: "/dashboard", icon: "grid" },
       { label: "Wallets", href: "/wallets", icon: "wallet" },
-      { label: "Assets", href: null, icon: "coins" },
+      { label: "Assets", href: "/assets", icon: "coins" },
     ],
   },
   {
-    title: "操作",
+    title: "Operations",
     items: [
       { label: "Swap", href: "/operations/swap", icon: "swap" },
-      { label: "Bridge", href: null, icon: "bridge" },
-      { label: "Transfer", href: null, icon: "transfer" },
+      { label: "Bridge", href: "/operations/bridge", icon: "bridge" },
+      { label: "Transfer", href: "/operations/transfer", icon: "transfer" },
     ],
   },
   {
-    title: "管理",
+    title: "Management",
     items: [
       { label: "Tasks", href: "/tasks", icon: "tasks" },
-      { label: "Transactions", href: null, icon: "list" },
-      { label: "Settings", href: null, icon: "gear" },
+      { label: "Transactions", href: "/transactions", icon: "list" },
+      { label: "Settings", href: "/settings", icon: "gear" },
     ],
   },
 ];
@@ -71,7 +72,10 @@ function Icon({ name, className }) {
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const runningTasks = tasks.filter((t) => t.status === "Running").length;
+  const { t } = useI18n();
+  const [tasks, setTasks] = useState([]);
+  useEffect(() => { fetch("/api/tasks", { cache: "no-store" }).then((r) => r.ok ? r.json() : { tasks: [] }).then((data) => setTasks(data.tasks || [])).catch(() => setTasks([])); }, []);
+  const runningTasks = tasks.filter((t) => ["Running", "Queued"].includes(t.status)).length;
   const failedTasks = tasks.filter((t) => t.status === "Failed").length;
 
   const isActive = (href) => href && (pathname === href || pathname.startsWith(href + "/"));
@@ -87,7 +91,7 @@ export default function Sidebar() {
         </div>
         <div>
           <div className="text-[15px] font-semibold leading-tight text-gray-900">EVM Console</div>
-          <div className="text-xs text-gray-400">多钱包资产与批量交易</div>
+          <div className="text-xs text-gray-400">{t("Multi-wallet assets and batch transactions")}</div>
         </div>
       </div>
 
@@ -96,11 +100,11 @@ export default function Sidebar() {
         {NAV_GROUPS.map((group) => (
           <div key={group.title}>
             <div className="mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-widest text-gray-400">
-              {group.title}
+              {t(group.title)}
             </div>
             <div className="space-y-0.5">
               {group.items.map((item) => (
-                <NavRow key={item.label} item={item} active={isActive(item.href)} />
+                <NavRow key={item.href || item.label} item={{ ...item, label: t(item.label) }} active={isActive(item.href)} comingSoon={t("Coming soon")} soon={t("Soon")} />
               ))}
             </div>
           </div>
@@ -114,7 +118,7 @@ export default function Sidebar() {
           className="block rounded-xl border border-gray-200 bg-gray-50 p-3.5 transition-colors hover:border-teal-200 hover:bg-teal-50"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-gray-500">任务状态</span>
+            <span className="text-xs font-medium text-gray-500">{t("Task status")}</span>
             {runningTasks + failedTasks > 0 && (
               <span className="rounded-full bg-teal-600 px-2 py-0.5 text-[11px] font-medium text-white">
                 {runningTasks + failedTasks}
@@ -124,11 +128,11 @@ export default function Sidebar() {
           <div className="mt-2 flex gap-4 text-sm">
             <span className="flex items-center gap-1.5 text-gray-700">
               <span className="h-2 w-2 rounded-full bg-blue-500" />
-              {runningTasks} 运行中
+              {runningTasks} {t("Running")}
             </span>
             <span className={`flex items-center gap-1.5 ${failedTasks > 0 ? "text-red-600" : "text-gray-400"}`}>
               <span className={`h-2 w-2 rounded-full ${failedTasks > 0 ? "bg-red-500" : "bg-gray-300"}`} />
-              {failedTasks} 失败
+              {failedTasks} {t("Failed")}
             </span>
           </div>
         </Link>
@@ -137,16 +141,16 @@ export default function Sidebar() {
   );
 }
 
-function NavRow({ item, active }) {
+function NavRow({ item, active, comingSoon, soon }) {
   const base =
     "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors";
 
   if (!item.href) {
     return (
-      <div className={`${base} cursor-not-allowed text-gray-400`} title="即将上线">
+      <div className={`${base} cursor-not-allowed text-gray-400`} title={comingSoon}>
         <Icon name={item.icon} className="text-gray-300 group-hover:text-gray-400" />
         <span>{item.label}</span>
-        <span className="ml-auto rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] text-gray-400">Soon</span>
+        <span className="ml-auto rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] text-gray-400">{soon}</span>
       </div>
     );
   }

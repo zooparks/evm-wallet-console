@@ -1,14 +1,20 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useI18n } from "@/i18n/I18nProvider";
 
 /**
  * Sub2API 风格自定义下拉选择框
- * props: options (string[]) | value | onChange | className (控制宽度)
+ * Options may be strings or { value, label } objects.
  */
-export default function Select({ options, value, onChange, placeholder = "请选择", className = "" }) {
+export default function Select({ options, value, onChange, placeholder, className = "" }) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
+  const normalizedOptions = options.map((option) =>
+    typeof option === "string" ? { value: option, label: option } : option
+  );
+  const selectedOption = normalizedOptions.find((option) => option.value === value);
 
   useEffect(() => {
     function onDocClick(e) {
@@ -31,7 +37,7 @@ export default function Select({ options, value, onChange, placeholder = "请选
             : "border-gray-200 hover:border-gray-300"
         }`}
       >
-        <span className="flex-1 truncate text-left">{value || placeholder}</span>
+        <span className="flex-1 truncate text-left">{selectedOption?.label || placeholder || t("Select")}</span>
         <svg
           viewBox="0 0 24 24"
           fill="currentColor"
@@ -44,20 +50,22 @@ export default function Select({ options, value, onChange, placeholder = "请选
       {open && (
         <div className="absolute left-0 top-full z-40 mt-1 w-full rounded-xl border border-gray-200 bg-white py-1 shadow-lg">
           <div className="max-h-60 overflow-y-auto">
-            {options.map((opt) => {
-              const selected = opt === value;
+            {normalizedOptions.map((option) => {
+              const selected = option.value === value;
               return (
                 <div
-                  key={opt}
+                  key={option.value}
+                  role="option"
+                  aria-selected={selected}
                   onClick={() => {
-                    onChange && onChange(opt);
+                    onChange && onChange(option.value);
                     setOpen(false);
                   }}
                   className={`flex cursor-pointer items-center justify-between gap-2 px-4 py-2.5 text-sm transition-colors ${
                     selected ? "bg-teal-50 font-medium text-teal-700" : "text-gray-700 hover:bg-gray-50"
                   }`}
                 >
-                  <span className="truncate">{opt}</span>
+                  <span className="truncate">{option.label}</span>
                   {selected && (
                     <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4 shrink-0">
                       <path d="M9 16.2l-3.5-3.5L4 14.1l5 5 11-11-1.4-1.4L9 16.2z" />

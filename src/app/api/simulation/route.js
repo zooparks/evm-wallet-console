@@ -1,0 +1,3 @@
+import { estimateGas, rpcCall } from "@/lib/chains/evm";
+export const dynamic = "force-dynamic";
+export async function POST(request) { try { const body = await request.json(); const chain = body.chain || "ethereum"; const tx = body.transaction; if (!tx) throw new Error("transaction is required"); const gas = await estimateGas(chain, tx); let result = "0x"; try { result = await rpcCall(chain, "eth_call", [tx, body.block || "latest"]); } catch (error) { return Response.json({ simulation: { success: false, gas, error: error.message } }); } return Response.json({ simulation: { success: true, gas, result } }); } catch (error) { return Response.json({ error: error.message }, { status: 400 }); } }
